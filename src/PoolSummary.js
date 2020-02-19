@@ -1,14 +1,69 @@
 import React, { Component } from 'react';
+import ProgressBar from 'react-bootstrap/ProgressBar';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHome, faServer } from "@fortawesome/free-solid-svg-icons";
+import { faHome, faTrashAlt } from "@fortawesome/free-solid-svg-icons";
 import { faAws, faGoogle, faWindows } from "@fortawesome/free-brands-svg-icons";
+
+Date.prototype.addHours = function(hours){
+  this.setHours(this.getHours() + hours);
+  return this;
+}
 
 class PoolSummary extends Component {
   constructor(props) {
     super(props);
+    let pc = this.props.pool.workerPoolId.split('/');
     this.state = {
-      runningInstanceCount: Math.floor(Math.random() * Math.floor(this.props.pool.config.maxCapacity))
+      instances: [],
+      pending: 0,
+      domain: (pc.length > 0) ? pc[0] : '',
+      pool: (pc.length > 1) ? pc[1] : ''
     };
+    this.queryTaskcluster = this.queryTaskcluster.bind(this);
+  }
+  
+  componentDidMount() {
+    this.queryTaskcluster();
+  }
+  
+  queryTaskcluster() {
+    let instances = [];
+    fetch('https://firefox-ci-tc.services.mozilla.com/api/queue/v1/provisioners/' + this.state.domain + '/worker-types/' + this.state.pool + '/workers')
+      .then(response => response.json())
+      .then(container => {
+        instances = instances.concat(container.workers);
+        this.setState({ instances });
+        if (('continuationToken' in container) && instances.length < this.props.pool.config.maxCapacity) {
+          fetch('https://firefox-ci-tc.services.mozilla.com/api/queue/v1/provisioners/' + this.state.domain + '/worker-types/' + this.state.pool + '/workers?continuationToken=' + container.continuationToken)
+            .then(response => response.json())
+            .then(container => {
+              instances = instances.concat(container.workers);
+              this.setState({ instances });
+              if (('continuationToken' in container) && instances.length < this.props.pool.config.maxCapacity) {
+                fetch('https://firefox-ci-tc.services.mozilla.com/api/queue/v1/provisioners/' + this.state.domain + '/worker-types/' + this.state.pool + '/workers?continuationToken=' + container.continuationToken)
+                  .then(response => response.json())
+                  .then(container => {
+                    instances = instances.concat(container.workers);
+                    this.setState({ instances });
+                    if (('continuationToken' in container) && instances.length < this.props.pool.config.maxCapacity) {
+                      fetch('https://firefox-ci-tc.services.mozilla.com/api/queue/v1/provisioners/' + this.state.domain + '/worker-types/' + this.state.pool + '/workers?continuationToken=' + container.continuationToken)
+                        .then(response => response.json())
+                        .then(container => {
+                          instances = instances.concat(container.workers);
+                          this.setState({ instances });
+                        });
+                    }
+                  });
+              }
+            });
+        }
+      });
+    fetch('https://firefox-ci-tc.services.mozilla.com/api/queue/v1/pending/' + this.state.domain + '/' + this.state.pool)
+      .then(response => response.json())
+      .then(container => {
+        let pending = container.pendingTasks;
+        this.setState({ pending });
+      });
   }
 
   renderProviderIcon() {
@@ -17,35 +72,13 @@ class PoolSummary extends Component {
         return <FontAwesomeIcon icon={faAws} />;
       case 'azure':
         return <FontAwesomeIcon icon={faWindows} />;
+      case 'null-provider':
+        return <FontAwesomeIcon icon={faTrashAlt} />;
       default:
         return this.props.pool.providerId.endsWith('-gcp')
           ? <FontAwesomeIcon icon={faGoogle} />
           : <FontAwesomeIcon icon={faHome} />;
     }
-  }
-
-  getRunningInstanceCount() {
-    // todo: implement running instance count
-    let runningInstanceCount = this.state.runningInstanceCount;
-    if (runningInstanceCount < 0) {
-      runningInstanceCount = Math.floor(Math.random() * Math.floor(this.props.pool.config.maxCapacity));
-      this.setState({ runningInstanceCount });
-    }
-    return runningInstanceCount;
-  }
-
-  getRunningInstanceIconCount() {
-    return Math.round(((this.getRunningInstanceCount() / this.props.pool.config.maxCapacity) * 100) / 10);
-  }
-
-  getNonRunningInstanceIconCount() {
-    // this function handles js midpoint rounding so that when 2.5/5 rounds up to 3/5 on running instances, we round down to 2/5 on non-running instances
-    let runningInstanceIconCount = this.getRunningInstanceIconCount();
-    let nonRunningInstanceIconCount = Math.round((((this.props.pool.config.maxCapacity - this.getRunningInstanceCount()) / this.props.pool.config.maxCapacity) * 100) / 10);
-    if ((runningInstanceIconCount + nonRunningInstanceIconCount) > 10) {
-      return nonRunningInstanceIconCount - 1;
-    }
-    return nonRunningInstanceIconCount;
   }
 
   render() {
@@ -54,22 +87,18 @@ class PoolSummary extends Component {
         <span className="fa-li">
           {this.renderProviderIcon()}
         </span>
-        <strong>{this.props.pool.workerPoolId.split('/')[1]}</strong>
-        <br />
-        {
-          [...Array(this.getRunningInstanceIconCount()).keys()].map((i) => (
-            <FontAwesomeIcon icon={faServer} key={i} style={{marginRight: '2px', color: '#dff883'}} />
-          ))
-        }
-        {
-          [...Array(this.getNonRunningInstanceIconCount()).keys()].map((i) => (
-            <FontAwesomeIcon icon={faServer} key={i} style={{marginRight: '2px', color: '#bebebe'}} />
-          ))
-        }
-        &nbsp;
+        <strong>{this.state.pool}</strong>
         <span style={{fontSize: '80%'}}>
-          {this.getRunningInstanceCount()}/{this.props.pool.config.maxCapacity}
+          &nbsp;max: {this.props.pool.config.maxCapacity},
+          &nbsp;working: {this.state.instances.filter(i => (('latestTask' in i) && ('firstClaim' in i))).length},
+          &nbsp;initialising: {this.state.instances.filter(i => ((!('latestTask' in i) || !('firstClaim' in i)) && ((new Date(i.firstClaim)) > (new Date().addHours(-1))))).length},
+          &nbsp;pending: {this.state.pending}
         </span>
+        <br />
+        <ProgressBar>
+          <ProgressBar striped variant="success" now={Math.min(this.props.pool.config.maxCapacity, this.state.instances.filter(i => (('latestTask' in i) && ('firstClaim' in i))).length)} max={this.props.pool.config.maxCapacity} key={1} />
+          <ProgressBar striped now={Math.min(this.props.pool.config.maxCapacity, this.state.instances.filter(i => ((!('latestTask' in i) || !('firstClaim' in i)) && ((new Date(i.firstClaim)) > (new Date().addHours(-1))))).length)} max={this.props.pool.config.maxCapacity} key={2} />
+        </ProgressBar>
       </li>
     );
   }
