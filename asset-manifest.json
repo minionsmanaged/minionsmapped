@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/minionsmapped/static/css/main.e0785f73.chunk.css",
-    "main.js": "/minionsmapped/static/js/main.5e1f087f.chunk.js",
-    "main.js.map": "/minionsmapped/static/js/main.5e1f087f.chunk.js.map",
+    "main.js": "/minionsmapped/static/js/main.a338badf.chunk.js",
+    "main.js.map": "/minionsmapped/static/js/main.a338badf.chunk.js.map",
     "runtime-main.js": "/minionsmapped/static/js/runtime-main.9230a1a2.js",
     "runtime-main.js.map": "/minionsmapped/static/js/runtime-main.9230a1a2.js.map",
     "static/css/2.47e06e2e.chunk.css": "/minionsmapped/static/css/2.47e06e2e.chunk.css",
     "static/js/2.7392837e.chunk.js": "/minionsmapped/static/js/2.7392837e.chunk.js",
     "static/js/2.7392837e.chunk.js.map": "/minionsmapped/static/js/2.7392837e.chunk.js.map",
     "index.html": "/minionsmapped/index.html",
-    "precache-manifest.b58e4f52fa34c0a601eb654ff184c75d.js": "/minionsmapped/precache-manifest.b58e4f52fa34c0a601eb654ff184c75d.js",
+    "precache-manifest.bb621aa1246bffe94d96944e062242ca.js": "/minionsmapped/precache-manifest.bb621aa1246bffe94d96944e062242ca.js",
     "service-worker.js": "/minionsmapped/service-worker.js",
     "static/css/2.47e06e2e.chunk.css.map": "/minionsmapped/static/css/2.47e06e2e.chunk.css.map",
     "static/css/main.e0785f73.chunk.css.map": "/minionsmapped/static/css/main.e0785f73.chunk.css.map",
@@ -20,6 +20,6 @@
     "static/css/2.47e06e2e.chunk.css",
     "static/js/2.7392837e.chunk.js",
     "static/css/main.e0785f73.chunk.css",
-    "static/js/main.5e1f087f.chunk.js"
+    "static/js/main.a338badf.chunk.js"
   ]
 }
