@@ -24,7 +24,6 @@ class PoolSummary extends Component {
       domain: (pc.length > 0) ? pc[0] : '',
       pool: (pc.length > 1) ? pc[1] : ''
     };
-    //this.queryTaskcluster = this.queryTaskcluster.bind(this);
   }
   
   componentDidMount() {

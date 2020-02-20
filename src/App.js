@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Form from 'react-bootstrap/Form';
-import PoolSummary from './PoolSummary';
+import DomainSummary from './DomainSummary';
 import './App.css';
 
 class App extends Component {
@@ -85,25 +85,24 @@ class App extends Component {
       });
   }
 
-  renderPoolSummaryComponent(pool) {
-    let platform;
-    if (pool.providerId in this.state.filter.platform) {
-      platform = pool.providerId;
-    } else if (pool.providerId.endsWith('-gcp')) {
-      platform = 'google';
-    }
-    let level;
-    if (pool.providerId.includes('-level1-') || (pool.workerPoolId.split('/')[0].endsWith('-1'))) {
-      level = 'one';
-    } else if (pool.providerId.includes('-level3-') || (pool.workerPoolId.split('/')[0].endsWith('-3'))) {
-      level = 'three';
-    } else if (pool.providerId.includes('-test-') || (pool.workerPoolId.split('/')[0].endsWith('-t'))) {
-      level = 'test';
+  renderDomainSummaryComponent(domain, pools, filter) {
+    let domainPlatforms = pools.map(wp => (wp.providerId.endsWith('-gcp')) ? 'google' : (wp.providerId === 'null-provider') ? 'deleted' : wp.providerId).filter((v, i, a) => a.indexOf(v) === i);
+    let allDomainPlatformsShouldBeFiltered = domainPlatforms.every(dp => ((dp in filter.platform) && filter.platform[dp]));
+
+    let domainProviders = pools.map(wp => wp.providerId).filter((v, i, a) => a.indexOf(v) === i);
+    let allDomainProvidersShouldBeFiltered = domainProviders.every(dp => ((dp in filter.provider) && filter.provider[dp]));
+
+    let allDomainLevelsShouldBeFiltered = false;
+    if (domain.endsWith('-1') || domain.endsWith('-3') || domain.endsWith('-t')) {
+      let domainLevel = (domain.endsWith('-1')) ? 'one' : (domain.endsWith('-3')) ? 'three' : 'test';
+      allDomainLevelsShouldBeFiltered = ((domainLevel in filter.level) && filter.level[domainLevel]);
     } else {
-      level = 'none';
+      let domainLevels = pools.map(wp => (wp.providerId.includes('-level1-')) ? 'one' : (wp.providerId.includes('-level3-')) ? 'three' : (wp.providerId.includes('-test-')) ? 'test' : 'none').filter((v, i, a) => a.indexOf(v) === i);
+      allDomainLevelsShouldBeFiltered = domainLevels.every(dl => ((dl in filter.level) && filter.level[dl]));
     }
-    return ((!this.state.filter.platform[platform]) && (!this.state.filter.provider[pool.providerId]) && (!this.state.filter.level[level]))
-      ? <PoolSummary pool={pool} key={pool.workerPoolId} />
+
+    return ((!allDomainPlatformsShouldBeFiltered) && (!allDomainProvidersShouldBeFiltered) && (!allDomainLevelsShouldBeFiltered))
+      ? <DomainSummary domain={domain} pools={pools} filter={filter} key={domain} />
       : '';
   }
 
@@ -166,14 +165,7 @@ class App extends Component {
         <Row>
           <ul>
           {this.state.domains.map((domain) => (
-            <li key={domain}>
-              {domain}
-              <ul className="fa-ul">
-                {this.state.pools[domain].map((pool) => (
-                  this.renderPoolSummaryComponent(pool)
-                ))}
-              </ul>
-            </li>
+            this.renderDomainSummaryComponent(domain, this.state.pools[domain], this.state.filter)
           ))}
           </ul>
         </Row>
