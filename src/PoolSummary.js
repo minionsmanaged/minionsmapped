@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import ListGroupItem from 'react-bootstrap/ListGroupItem';
 import ProgressBar from 'react-bootstrap/ProgressBar';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHome, faTrashAlt } from "@fortawesome/free-solid-svg-icons";
@@ -97,23 +98,22 @@ class PoolSummary extends Component {
 
   render() {
     return (
-      <li key={this.props.pool.workerPoolId}>
-        <span className="fa-li">
-          {this.renderProviderIcon()}
-        </span>
-        <strong>{this.state.pool}</strong>
-        <span style={{fontSize: '80%'}}>
+      <ListGroupItem>
+        <strong>
+          {this.state.domain} / {this.state.pool} {this.renderProviderIcon()}
+        </strong>
+        <small className="text-muted font-weight-light float-right">
           &nbsp;max: {this.props.pool.config.maxCapacity},
           &nbsp;working: {this.state.instances.filter(i => (('latestTask' in i) && ('firstClaim' in i))).length},
           &nbsp;initialising: {this.state.instances.filter(i => ((!('latestTask' in i) || !('firstClaim' in i)) && ((new Date(i.firstClaim)) > (new Date().addHours(-1))))).length},
           &nbsp;pending: {this.state.pending}
-        </span>
+        </small>
         <br />
         <ProgressBar>
           <ProgressBar striped variant="success" now={Math.min(this.props.pool.config.maxCapacity, this.state.instances.filter(i => (('latestTask' in i) && ('firstClaim' in i))).length)} max={this.props.pool.config.maxCapacity} key={1} />
           <ProgressBar striped now={Math.min(this.props.pool.config.maxCapacity, this.state.instances.filter(i => ((!('latestTask' in i) || !('firstClaim' in i)) && ((new Date(i.firstClaim)) > (new Date().addHours(-1))))).length)} max={this.props.pool.config.maxCapacity} key={2} />
         </ProgressBar>
-      </li>
+      </ListGroupItem>
     );
   }
 }
