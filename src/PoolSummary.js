@@ -52,8 +52,7 @@ class PoolSummary extends Component {
             .then(response => response.json())
             .then(container => {
               instances = instances.concat(container.workers);
-              this.setState({ instances });
-              if (('continuationToken' in container) && instances.length < this.props.pool.config.maxCapacity) {
+              if ('continuationToken' in container) {
                 fetch('https://firefox-ci-tc.services.mozilla.com/api/queue/v1/provisioners/' + this.state.domain + '/worker-types/' + this.state.pool + '/workers?continuationToken=' + container.continuationToken)
                   .then(response => response.json())
                   .then(container => {
@@ -68,6 +67,8 @@ class PoolSummary extends Component {
                         });
                     }
                   });
+              } else {
+                this.setState({ instances });
               }
             });
         }
