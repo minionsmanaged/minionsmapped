@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router';
 import Container from 'react-bootstrap/Container';
+import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
 import Form from 'react-bootstrap/Form';
 import DomainSummary from './DomainSummary';
@@ -196,7 +197,7 @@ class App extends Component {
   }
 
   renderDebugData() {
-    if (window.location.hostname === 'localhost') {
+    if (window.location.hostname === 'localhost' && false) {
       return (
         <Row>
           <pre>{JSON.stringify(window.location, null, 2) }</pre>
@@ -265,20 +266,27 @@ class App extends Component {
   render() {
     return (
       <Container>
-        {this.renderDebugData()}
-        {Object.keys(this.state.filter).map((filterType) => (
-          <Row>
-            {filterType}s:&nbsp;
-            <Form>
-              {Object.keys(this.state.filter[filterType]).map((filter) => (
-                <Form.Check inline type="checkbox" onChange={this.handleFilterChange} checked={!this.state.filter[filterType][filter]} label={filter} id={'filter_' + filterType + '_' + filter} key={'filter_' + filterType + '_' + filter} />
-              ))}
-            </Form>
-          </Row>
-        ))}
-        {this.state.domains.map((domain) => (
-          this.renderDomainSummaryComponent(domain, this.state.pools[domain], this.state.filter)
-        ))}
+        <Row>
+          <Col xs={10}>
+            <h2>taskcluster pools</h2>
+            {this.state.domains.map((domain) => (
+              this.renderDomainSummaryComponent(domain, this.state.pools[domain], this.state.filter)
+            ))}
+          </Col>
+          <Col>
+            <h5>selection filters</h5>
+            {Object.keys(this.state.filter).map((filterType) => (
+              <Form>
+                <hr />
+                <h6>{filterType}s</h6>
+                {Object.keys(this.state.filter[filterType]).map((filter) => (
+                  <Form.Check type="checkbox" onChange={this.handleFilterChange} checked={!this.state.filter[filterType][filter]} label={filter} id={'filter_' + filterType + '_' + filter} key={'filter_' + filterType + '_' + filter} />
+                ))}
+              </Form>
+            ))}
+            {this.renderDebugData()}
+          </Col>
+        </Row>
       </Container>
     );
   }
