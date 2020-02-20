@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "b8935ecb4df696c910a435a26e46f0a8",
+    "revision": "117d669fb48177a3702d64c26fdb5343",
     "url": "/minionsmapped/index.html"
   },
   {
@@ -8,7 +8,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/minionsmapped/static/css/2.47e06e2e.chunk.css"
   },
   {
-    "revision": "b1b16c8aa231f3c8cc2b",
+    "revision": "22017075cd32016ebf89",
     "url": "/minionsmapped/static/css/main.e0785f73.chunk.css"
   },
   {
@@ -20,8 +20,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/minionsmapped/static/js/2.62afd87c.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "b1b16c8aa231f3c8cc2b",
-    "url": "/minionsmapped/static/js/main.fb46907e.chunk.js"
+    "revision": "22017075cd32016ebf89",
+    "url": "/minionsmapped/static/js/main.d52be277.chunk.js"
   },
   {
     "revision": "34bb26760329ae2d30c8",
