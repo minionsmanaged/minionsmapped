@@ -8,8 +8,13 @@ Date.prototype.addHours = function(hours){
   this.setHours(this.getHours() + hours);
   return this;
 }
+const minIntervalMs = 10000;
+const maxIntervalMs = 60000;
 
 class PoolSummary extends Component {
+
+  interval;
+
   constructor(props) {
     super(props);
     let pc = this.props.pool.workerPoolId.split('/');
@@ -19,11 +24,20 @@ class PoolSummary extends Component {
       domain: (pc.length > 0) ? pc[0] : '',
       pool: (pc.length > 1) ? pc[1] : ''
     };
-    this.queryTaskcluster = this.queryTaskcluster.bind(this);
+    //this.queryTaskcluster = this.queryTaskcluster.bind(this);
   }
   
   componentDidMount() {
     this.queryTaskcluster();
+    // refresh data in this component at a random interval, in
+    // order to prevent all components updating simultaneously
+    // https://blog.stvmlbrn.com/2019/02/20/automatically-refreshing-data-in-react.html
+    let intervalMs = Math.floor(Math.random() * (maxIntervalMs - minIntervalMs)) + minIntervalMs;
+    this.interval = setInterval(this.queryTaskcluster.bind(this), intervalMs);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.interval);
   }
   
   queryTaskcluster() {
